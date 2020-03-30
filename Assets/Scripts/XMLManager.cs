@@ -13,26 +13,7 @@ public class XMLManager
   
 
     public static GameObjectDataBase gameObjectsDB = new GameObjectDataBase();
-    //void Awake()
-    //{
-        
-    //}
 
-    //// Start is called before the first frame update
-    //void Start()
-    //{
-    //    //SpawnCube();
-
-    //    instance = this;
-    //    Debug.Log(instance);
-
-    //}
-
-    //// Update is called once per frame
-    //void Update()
-    //{
-        
-    //}
 
     public static void SaveXML(string path)
     {
