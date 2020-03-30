@@ -6,38 +6,68 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
 
-
-public class XMLManager : MonoBehaviour
+[ExecuteInEditMode]
+public class XMLManager 
 {
     public static XMLManager instance;
+  
 
-    public GameObjectDataBase gameObjectsDB;
-    void Awake()
-    {
-        instance = this;
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        SpawnCube();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
+    public static GameObjectDataBase gameObjectsDB = new GameObjectDataBase();
+    //void Awake()
+    //{
         
-    }
+    //}
 
-    public void SaveXML(string path)
+    //// Start is called before the first frame update
+    //void Start()
+    //{
+    //    //SpawnCube();
+
+    //    instance = this;
+    //    Debug.Log(instance);
+
+    //}
+
+    //// Update is called once per frame
+    //void Update()
+    //{
+        
+    //}
+
+    public static void SaveXML(string path)
     {
+ 
+        
+        var allGameObjects = Object.FindObjectsOfType<GameObject>();
+
+        foreach (GameObject o in allGameObjects)
+        {
+            if (o.tag == "Untagged")
+            {
+                Debug.Log("Found a game object");
+                GameObjects info = new GameObjects();
+                info.name = o.name;
+                info.position = o.transform.position;
+                info.rotation = o.transform.rotation;
+                info.scale = o.transform.localScale;
+                info.mesh = o.GetComponent<MeshFilter>().sharedMesh;
+                //info.shader = o.GetComponent<Renderer>().sharedMaterial.shader;
+                info.color = o.GetComponent<Renderer>().sharedMaterial.GetColor("_Color");
+                gameObjectsDB.gameObjectList.Add(info);
+            }
+        }
+
         XmlSerializer serializer = new XmlSerializer(typeof(GameObjectDataBase));
         FileStream stream = new FileStream(path, FileMode.Create);
         serializer.Serialize(stream, gameObjectsDB);
         stream.Close();
+        
+        gameObjectsDB.gameObjectList.Clear();
+        Debug.Log(gameObjectsDB.gameObjectList.Count);
+
     }
 
-    public void LoadXML(string path)
+    public static void LoadXML(string path)
     {
         XmlSerializer serializer = new XmlSerializer(typeof(GameObjectDataBase));
         FileStream stream = new FileStream(path, FileMode.Open);
@@ -45,22 +75,35 @@ public class XMLManager : MonoBehaviour
         stream.Close();
 
         SpawnCube();
+
     }
 
-    public GameObject cubePrefab;
+    //public GameObject cubePrefab;
 
 
-    void SpawnCube()
+    static void SpawnCube()
     {
-        foreach(GameObject o in GameObject.FindGameObjectsWithTag("Cube"))
+        foreach(GameObject o in Object.FindObjectsOfType<GameObject>())
         {
-            Destroy(o);
+            if (o.tag == "Untagged")
+                Object.DestroyImmediate(o);
         }
+        
         foreach (GameObjects gameObject in gameObjectsDB.gameObjectList)
         {
-            GameObject newCube = Instantiate(cubePrefab, gameObject.position, cubePrefab.transform.rotation);
-            newCube.tag = "Cube";
-            newCube.GetComponent<Renderer>().material.SetColor("_Color", gameObject.color);
+            Debug.Log("Adding A GameObject");
+            GameObject newCube = new GameObject(gameObject.name);
+            //newCube = Object.Instantiate(new GameObject(), gameObject.position, new Quaternion(0, 0, 0, 1));
+            newCube.transform.position = gameObject.position;
+            newCube.transform.rotation = gameObject.rotation;
+            newCube.transform.localScale = gameObject.scale;
+            newCube.AddComponent<MeshFilter>().sharedMesh = gameObject.mesh;
+            newCube.AddComponent<MeshRenderer>();
+            //newCube.AddComponent<Renderer>();
+            newCube.name = gameObject.name;
+            newCube.tag = "Untagged";
+            newCube.GetComponent<Renderer>().sharedMaterial = new Material(Shader.Find("Standard"));
+            newCube.GetComponent<Renderer>().sharedMaterial.SetColor("_Color", gameObject.color);
         }
     }
 
@@ -69,17 +112,11 @@ public class XMLManager : MonoBehaviour
 [System.Serializable]
 public class GameObjects
 {
-    public int ObjectID;
-    //public float positionX;
-    //public float positionY;
-    //public float positionZ;
-
+    public string name;
     public Vector3 position;
-
-    //public float colorR;
-    //public float colorG;
-    //public float colorB;
-
+    public Quaternion rotation;
+    public Vector3 scale;
+    public Mesh mesh;
     public Color color;
 }
 

@@ -8,7 +8,6 @@ using System.Xml.Serialization;
 using System.IO;
 
 
-
 public class Editor
 {
 
@@ -18,7 +17,7 @@ public class Editor
         string path = EditorUtility.SaveFilePanel("Save Scene", Application.dataPath, "scene", "xml");
         if(path.Length != 0)
         {
-            XMLManager.instance.SaveXML(path);
+            XMLManager.SaveXML(path);
         }
     }
 
@@ -28,7 +27,7 @@ public class Editor
         string path = EditorUtility.OpenFilePanel("Load Scene", Application.dataPath, "xml");
         if(path.Length != 0)
         {
-            XMLManager.instance.LoadXML(path);
+            XMLManager.LoadXML(path);
         }
 
     }
